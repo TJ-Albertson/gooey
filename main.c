@@ -80,8 +80,10 @@ int main()
     glEnable(GL_CULL_FACE);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
+    /* glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); */
+
+    ShaderID window_shader = createShader("resources/shaders/window.vs", "resources/shaders/window.fs");
     ShaderID text_shader = createShader("resources/shaders/text.vs", "resources/shaders/text.fs");
     Mat4* projection = ortho(0.0f, SCREEN_WIDTH, 0.0f, SCREEN_HEIGHT, 0.0f, 100.0f);
     glUseProgram(text_shader);
@@ -207,14 +209,15 @@ int main()
         sprintf(mouse_pos_str, "X=%.2f, Y=%.2f", mouse_x, mouse_y);
 
 
-        RenderTri(text_shader, color1);
         
         RenderText(text_shader, mouse_pos_str, 50.0f, 40.0f, 1.0f, color1);
 
 
         RenderText(text_shader, "(C) LearnOpenGL.com", 420.0f, 400.0f, 0.5f, color2);
 
-        RenderBox(text_shader, window1, 1.0f, color1);
+        glUseProgram(window_shader);
+        setShaderMat4(window_shader, "projection", projection);
+        RenderBox(window_shader, window1, 1.0f, color1);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -227,52 +230,22 @@ int main()
 void RenderBox(unsigned int shader_id, Window window, float scale, Vector3D color)
 {
     glUseProgram(shader_id);
-    glUniform3f(glGetUniformLocation(shader_id, "textColor"), color.x, color.y, color.z);
-    glActiveTexture(GL_TEXTURE0);
+    glUniform4f(glGetUniformLocation(shader_id, "color"), color.x, color.y, color.z, 1.0f);
     glBindVertexArray(VAO);
     
 
     window.max.y = SCREEN_HEIGHT - window.max.y;
     window.min.y = SCREEN_HEIGHT - window.min.y;
 
-  
-
-    
-
     float vertices[6][4] = {
-        { window.min.x, window.min.y, 0.0f, 0.0f },
         { window.max.x, window.min.y, 0.0f, 1.0f },
+        { window.min.x, window.min.y, 0.0f, 0.0f },  
         { window.max.x, window.max.y, 1.0f, 1.0f },
 
-        { window.min.x, window.min.y, 0.0f, 0.0f },
-        { window.max.x, window.max.y, 1.0f, 1.0f },
-        { window.min.x, window.max.y, 1.0f, 0.0f }
+        { window.min.x, window.min.y, 1.0f, 1.0f },
+        { window.min.x, window.max.y, 0.0f, 0.0f },      
+        { window.max.x, window.max.y, 1.0f, 0.0f }
     };
-
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices); /* be sure to use glBufferSubData and not glBufferData */
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-
-    glBindVertexArray(0);
-}
-
-void RenderTri(unsigned int shader_id, Vector3D color)
-{
-    glUseProgram(shader_id);
-    glUniform3f(glGetUniformLocation(shader_id, "textColor"), color.x, color.y, color.z);
-    glActiveTexture(GL_TEXTURE0);
-    glBindVertexArray(VAO);
-
-    float vertices[3][4] = {
-        { 100.0f, 100.0f, 0.0f, 0.0f },
-        { 200.0f, 100.0f, 0.0f, 1.0f },
-        { 200.0f, 200.0f, 1.0f, 1.0f },
-    };
-
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices); /* be sure to use glBufferSubData and not glBufferData */
