@@ -20,6 +20,15 @@ typedef struct Vector3D
 }
 Vector3D;
 
+typedef struct {
+    union {
+        struct {
+            float x, y, z, w;
+        };
+        float data[4];
+    };
+} Vector4D;
+
 void normalize(Vector3D *v) {
     float length = my_sqrt(v->x * v->x + v->y * v->y + v->z * v->z);
     v->x /= length;

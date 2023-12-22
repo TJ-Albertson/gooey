@@ -25,8 +25,7 @@ unsigned int VAO, VBO;
 Character Characters[128];
 
 void RenderText(unsigned int shader_id, char *text, float x, float y, float scale, Vector3D color);
-void RenderBox(unsigned int shader_id, Window window, float scale, Vector3D color);
-void RenderTri(unsigned int shader_id, Vector3D color);
+void RenderBox(unsigned int shader_id, Window window, float scale, Vector4D color);
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
@@ -182,9 +181,12 @@ int main()
     glBindVertexArray(0);
 
     Vector3D color1 = {0.5, 0.8, 0.2};
+    
     Vector3D color2 = {0.3, 0.7, 0.9};
-    float x = 25.0f;
-    float y = 25.0f;
+    
+    
+    Vector4D window_color = {0.2, 0.2, 0.7, 0.5};
+
 
     Window window1;
     window1.min.x = 25.0f;
@@ -192,6 +194,14 @@ int main()
 
     window1.max.x = 125.0f;
     window1.max.y = 125.0f;
+
+    Vector2D min = {25, 25};
+    Vector2D max = {75, 75};
+
+    int window_index = gooey_window_create(min, max);
+    printf("window_index: %d\n", window_index);
+
+    printf("window[%d].min.x: %.2f\n", window_index, windows[window_index].max.x);
 
 
     while (!glfwWindowShouldClose(window))
@@ -217,7 +227,7 @@ int main()
 
         glUseProgram(window_shader);
         setShaderMat4(window_shader, "projection", projection);
-        RenderBox(window_shader, window1, 1.0f, color1);
+        RenderBox(window_shader, window1, 1.0f, window_color);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -227,10 +237,10 @@ int main()
     return 0;
 }
 
-void RenderBox(unsigned int shader_id, Window window, float scale, Vector3D color)
+void RenderBox(unsigned int shader_id, Window window, float scale, Vector4D color)
 {
     glUseProgram(shader_id);
-    glUniform4f(glGetUniformLocation(shader_id, "color"), color.x, color.y, color.z, 1.0f);
+    glUniform4f(glGetUniformLocation(shader_id, "color"), color.x, color.y, color.z, color.w);
     glBindVertexArray(VAO);
     
 
