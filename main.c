@@ -43,7 +43,14 @@ static void cursor_position_callback(GLFWwindow* window, double xpos, double ypo
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+    {
         printf("left button click\n");
+
+        Vector2D mouse_pos = { mouse_x, mouse_y };
+
+        gooey_window_collision(mouse_pos);
+    }
+        
 }
 
 int main()
@@ -195,8 +202,8 @@ int main()
     window1.max.x = 125.0f;
     window1.max.y = 125.0f;
 
-    Vector2D min = {25, 25};
-    Vector2D max = {75, 75};
+    Vector2D min = {125, 125};
+    Vector2D max = {275, 275};
 
     int window_index = gooey_window_create(min, max);
     printf("window_index: %d\n", window_index);
@@ -227,7 +234,9 @@ int main()
 
         glUseProgram(window_shader);
         setShaderMat4(window_shader, "projection", projection);
+
         RenderBox(window_shader, window1, 1.0f, window_color);
+        gooey_window_draw(window_shader, SCREEN_HEIGHT, VAO, VBO);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
