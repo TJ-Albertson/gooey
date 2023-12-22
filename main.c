@@ -41,6 +41,8 @@ static void cursor_position_callback(GLFWwindow* window, double xpos, double ypo
 
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE) 
     {
+        mouse_x_last = mouse_x;
+        mouse_y_last = mouse_y;
         return;
     }
 
@@ -49,6 +51,8 @@ static void cursor_position_callback(GLFWwindow* window, double xpos, double ypo
 
     Vector2D mouse_offset = { x_offset, y_offset };
     gooey_window_move(mouse_offset);
+
+    printf("Mouse offset: %f %f\n", mouse_offset.x, mouse_offset.y);
 
     mouse_x_last = mouse_x;
     mouse_y_last = mouse_y;
