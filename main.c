@@ -226,6 +226,10 @@ int main()
     int window_index = gooey_window_create(min, max);
     printf("window_index: %d\n", window_index);
 
+    Vector2D min2 = {300, 300};
+    Vector2D max2 = {500, 500};
+    gooey_window_create(min2, max2);
+
     printf("window[%d].min.x: %.2f\n", window_index, windows[window_index].max.x);
 
 
