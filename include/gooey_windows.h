@@ -130,4 +130,16 @@ void gooey_window_collision(Vector2D point)
     focused_window_index = -1;
 }
 
+void gooey_window_move(Vector2D mouse_offset)
+{
+    if(focused_window_index >= 0)
+    {   
+        windows[focused_window_index].min.x += mouse_offset.x;
+        windows[focused_window_index].max.x += mouse_offset.x;
+
+        windows[focused_window_index].min.y += mouse_offset.y;
+        windows[focused_window_index].max.y += mouse_offset.y;
+    }
+}
+
 #endif

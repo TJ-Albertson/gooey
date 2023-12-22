@@ -19,7 +19,7 @@ typedef struct {
 unsigned int SCREEN_WIDTH = 640;
 unsigned int SCREEN_HEIGHT = 480;
 
-float mouse_x, mouse_y;
+float mouse_x, mouse_y, mouse_x_last, mouse_y_last;
 
 unsigned int VAO, VBO;
 Character Characters[128];
@@ -38,6 +38,20 @@ static void cursor_position_callback(GLFWwindow* window, double xpos, double ypo
 {
     mouse_x = xpos;
     mouse_y = ypos;
+
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE) 
+    {
+        return;
+    }
+
+    float x_offset = mouse_x - mouse_x_last;
+    float y_offset = mouse_y - mouse_y_last;
+
+    Vector2D mouse_offset = { x_offset, y_offset };
+    gooey_window_move(mouse_offset);
+
+    mouse_x_last = mouse_x;
+    mouse_y_last = mouse_y;
 }
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
