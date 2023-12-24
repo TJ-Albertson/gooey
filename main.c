@@ -52,8 +52,6 @@ static void cursor_position_callback(GLFWwindow* window, double xpos, double ypo
     Vector2D mouse_offset = { x_offset, y_offset };
     gooey_window_move(mouse_offset);
 
-    printf("Mouse offset: %f %f\n", mouse_offset.x, mouse_offset.y);
-
     mouse_x_last = mouse_x;
     mouse_y_last = mouse_y;
 }
@@ -232,6 +230,8 @@ int main()
 
     printf("window[%d].min.x: %.2f\n", window_index, windows[window_index].max.x);
 
+    double lastTime = glfwGetTime();
+    int frameCount = 0;
 
     while (!glfwWindowShouldClose(window))
     {
@@ -259,6 +259,18 @@ int main()
 
         RenderBox(window_shader, window1, 1.0f, window_color);
         gooey_window_draw(window_shader, SCREEN_HEIGHT, VAO, VBO);
+
+        char fps_str[50];
+        double currentTime = glfwGetTime();
+        frameCount++;
+        if (currentTime - lastTime >= 1.0) {
+            
+            sprintf(fps_str, "FPS: %d", frameCount);
+            
+            frameCount = 0;
+            lastTime += 1.0;
+        }
+        RenderText(text_shader, fps_str, SCREEN_WIDTH - 200.0f, 40.0f, 1.0f, color1);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
