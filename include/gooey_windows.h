@@ -131,7 +131,7 @@ void gooey_window_draw()
 
         glBindVertexArray(0);
 
-        gooey_text(window.title, window.min.x, SCREEN_HEIGHT - window.min.y + 5, 0.5, white);
+        gooey_text(window.title, window.min.x + 5, SCREEN_HEIGHT - window.min.y + 18, 0.45, white);
     }
 }
 
