@@ -2,14 +2,9 @@
 out vec4 fragColor;
 
 in vec2 TexCoords;
-in vec2 FragCoords;
-
-uniform vec2 iResolution;
 
 void main()
 {
-    // Gradients
-   // vec2 p = (2.0 * TexCoords - iResolution.xy) / min(iResolution.y, iResolution.x);
     vec2 p = TexCoords;
     vec2 px = dFdx(p);
     vec2 py = dFdy(p);
