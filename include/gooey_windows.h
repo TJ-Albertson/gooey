@@ -10,6 +10,11 @@ typedef struct {
     char title[64];
 } Window;
 
+typedef enum {
+    BLUE,
+    RED
+} WindowColor;
+
 short window_state = 0;
 const unsigned int MAX_WINDOWS = 16;
 Window windows[16];
@@ -26,10 +31,30 @@ void print_binary(int data, int size) {
     printf("\n");
 }
 
+Vector4D gooey_color_to_vector3(WindowColor color)
+{
+    float alpha = 0.6f;
+
+    switch (color) {
+        case BLUE: {
+            Vector4D vector_color = {0.16078f, 0.45882f, 0.73725f, alpha};
+            return vector_color;
+        }
+           
+        case RED: {
+            Vector4D vector_color = {0.0f, 0.0f, 1.0f, alpha};
+            return vector_color;
+        }
+            
+        default: {
+            Vector4D vector_color = {0.0f, 0.0f, 1.0f, alpha};
+            return vector_color;
+        }
+    }
+}
+
 int gooey_window_create(char* title, Vector2D min, Vector2D max)
 {   
-    print_binary(window_state, 16);
-
     /* find first empty index */
     int i;
     for (i = 0; i < MAX_WINDOWS; ++i)
@@ -55,7 +80,7 @@ void gooey_window_destroy(int index)
 
 }
 
-void gooey_window_draw()
+void gooey_window_draw(WindowColor window_color)
 {
 
     int i;
@@ -68,18 +93,21 @@ void gooey_window_draw()
             continue;
         }
 
-        
-
         Window window = windows[i];
-        Vector4D color = {0.2, 0.2, 0.7, 0.5};
+        /* Vector4D color = {0.2, 0.2, 0.7, 0.5}; */
+        Vector4D color = gooey_color_to_vector3(window_color);
+
+        float handle_alpha = 0.6f;
+        float window_alpha = 0.6f; 
 
         if(focused_window_index == i)
         {
-            color.w = 0.8; 
+            handle_alpha = 0.8f;
+            window_alpha = 0.65f; 
         }
 
         glUseProgram(window_shader);
-        glUniform4f(glGetUniformLocation(window_shader, "color"), color.x, color.y, color.z, color.w);
+        glUniform4f(glGetUniformLocation(window_shader, "color"), color.x, color.y, color.z, window_alpha);
         glBindVertexArray(VAO);
 
         Vector2D min = window.min;
@@ -105,9 +133,7 @@ void gooey_window_draw()
 
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
-        glUseProgram(window_shader);
-        glUniform4f(glGetUniformLocation(window_shader, "color"), color.x + 0.2, color.y+ 0.2, color.z+ 0.2, color.w+0.2);
-        glBindVertexArray(VAO);
+        glUniform4f(glGetUniformLocation(window_shader, "color"), color.x, color.y, color.z, handle_alpha);
 
         window.max.y = window.min.y - 20;
 
@@ -137,8 +163,6 @@ void gooey_window_draw()
 
 void gooey_window_collision(Vector2D point)
 {
-    print_binary(window_state, 16);
-
     int i;
     for (i = 0; i < MAX_WINDOWS; ++i)
     {
@@ -148,8 +172,6 @@ void gooey_window_collision(Vector2D point)
         {
             continue;
         }
-
-        printf("point: %f %f\n", point.x, point.y);
 
         Vector2D min = windows[i].min;
         Vector2D max = windows[i].max;

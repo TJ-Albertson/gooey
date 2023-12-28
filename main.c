@@ -8,10 +8,11 @@
 
 #include <shader.h>
 #include <gooey.h>
-
-
+#include <wavefront.h>
 
 float mouse_x, mouse_y, mouse_x_last, mouse_y_last;
+
+float svg_scale = 200.0f;
 
 void RenderBox(unsigned int shader_id, Window window, float scale, Vector4D color);
 
@@ -48,13 +49,16 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
     {
-        printf("left button click\n");
-
         Vector2D mouse_pos = { mouse_x, mouse_y };
 
         gooey_window_collision(mouse_pos);
     }
         
+}
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    svg_scale += yoffset * 20;
 }
 
 int main()
@@ -80,6 +84,7 @@ int main()
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetCursorPosCallback(window, cursor_position_callback);
     glfwSetMouseButtonCallback(window, mouse_button_callback);
+    glfwSetScrollCallback(window, scroll_callback);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
@@ -91,7 +96,7 @@ int main()
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    /* glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); */
+    
 
 
     /* FreeType */
@@ -178,15 +183,18 @@ int main()
 
     if (!gooey_initialize())
     {
-        fprintf(stderr, "ERROR::GOOEY: Failed to initialize GLAD\n");
+        fprintf(stderr, "ERROR::GOOEY: Failed to initialize GOOEY\n");
         return -1;
     }
 
-
-    
+    /*
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    */    
+   
+    unsigned int basic_shader = createShader("resources/shaders/basic.vs", "resources/shaders/vector.fs");
+    WaveFront wave_test = load_wave("./resources/models/untitled2.obj");
 
     Vector3D color1 = {0.5, 0.8, 0.2};
-    
     Vector3D color2 = {0.3, 0.7, 0.9};
     
     
@@ -218,7 +226,7 @@ int main()
 
     while (!glfwWindowShouldClose(window))
     {
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
         
@@ -239,19 +247,33 @@ int main()
 
         glUseProgram(window_shader);
         setShaderMat4(window_shader, "projection", projection);
-        gooey_window_draw();
+        gooey_window_draw(BLUE);
 
         char fps_str[50];
         double currentTime = glfwGetTime();
         frameCount++;
-        if (currentTime - lastTime >= 1.0) {
-            
+        if (currentTime - lastTime >= 1.0) 
+        {
             sprintf(fps_str, "FPS: %d", frameCount);
             
             frameCount = 0;
             lastTime += 1.0;
         }
         gooey_text(fps_str, SCREEN_WIDTH - 200.0f, 40.0f, 1.0f, color1);
+
+
+        glUseProgram(basic_shader);
+        setShaderMat4(basic_shader, "projection", projection);
+        setShaderVec2(basic_shader, "iResolution", SCREEN_WIDTH, SCREEN_HEIGHT);
+
+        Mat4 model;
+        clear_matrix(&model);
+        translateMat4(&model, mouse_x, SCREEN_HEIGHT - mouse_y, 0);
+        scaleMat4(&model, svg_scale, svg_scale, 1.0f);
+        
+        setShaderMat4(basic_shader, "model", &model);
+        
+        wavefront_draw(basic_shader, wave_test);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
