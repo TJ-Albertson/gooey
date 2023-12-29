@@ -3,6 +3,8 @@ out vec4 fragColor;
 
 in vec2 TexCoords;
 
+uniform bool convex;
+
 void main()
 {
     vec2 p = TexCoords;
@@ -20,11 +22,22 @@ void main()
     float alpha = 0.5 - sd;
 
     if (alpha > 1.0) {
-        // Inside
-         discard;
+        if (convex) {
+            fragColor = vec4(1.0, 0.0, 0.0, 1.0);
+       
+        } else {
+            discard;
+        }
+        
     } else if (alpha < 0.0) {
         // Outside
-        fragColor = vec4(1.0, 0.0, 0.0, 1.0);
+        if (convex) {
+            discard;
+       
+        } else {
+            fragColor = vec4(1.0, 0.0, 0.0, 1.0);
+        }
+        
        
     } else {
         // Near boundary

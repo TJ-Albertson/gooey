@@ -92,13 +92,6 @@ int main()
         return -1;
     }
 
-    glEnable(GL_CULL_FACE);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    
-
-
     /* FreeType */
     FT_Library ft;
     if (FT_Init_FreeType(&ft))
@@ -187,12 +180,16 @@ int main()
         return -1;
     }
 
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     /*
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     */    
    
     unsigned int basic_shader = createShader("resources/shaders/basic.vs", "resources/shaders/vector.fs");
     WaveFront wave_test = load_wave("./resources/models/untitled2.obj");
+    WaveFront corner = load_wave("./resources/models/untitled3.obj");
 
     Vector3D color1 = {0.5, 0.8, 0.2};
     Vector3D color2 = {0.3, 0.7, 0.9};
@@ -272,8 +269,12 @@ int main()
         scaleMat4(&model, svg_scale, svg_scale, 1.0f);
         
         setShaderMat4(basic_shader, "model", &model);
-        
+
+         setShaderBool(basic_shader, "convex", 0);
         wavefront_draw(basic_shader, wave_test);
+
+        setShaderBool(basic_shader, "convex", 1);
+        wavefront_draw(basic_shader, corner);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
