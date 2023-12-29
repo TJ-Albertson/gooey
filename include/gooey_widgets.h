@@ -9,6 +9,8 @@ typedef enum {
     TOGGLE,
     RESIZE,
     SLIDER,
+    CLOSE,
+    HIDE
 } ButtonType;
 
 typedef struct {
@@ -38,7 +40,7 @@ const unsigned int MAX_BUTTONS = 16;
 Button buttons[16];
 
 
-int gooey_button_create(float x, float y, float scale, int window_index)
+int gooey_button_create(float x, float y, float scale, int window_index, ButtonType type)
 {
     /* find first empty index */
     int i;
@@ -53,7 +55,7 @@ int gooey_button_create(float x, float y, float scale, int window_index)
             buttons[i].y = y;
             buttons[i].scale = scale;
             buttons[i].window_index = window_index;
-            buttons[i].type = RESIZE;
+            buttons[i].type = type;
             return i;
         }
     }
@@ -91,9 +93,23 @@ void gooey_button_draw()
         float scale = button.scale;
 
         Vector2D min;
-        min.x = button.x + windows[button.window_index].min.x;
-        min.y = button.y + SCREEN_HEIGHT - windows[button.window_index].min.y;
 
+        if (button.type == RESIZE)
+        {
+            min.x = button.x + windows[button.window_index].max.x;
+            min.y = button.y + SCREEN_HEIGHT - windows[button.window_index].max.y;
+        } 
+        else if (button.type == CLOSE) 
+        {
+            min.x = button.x + windows[button.window_index].max.x;
+            min.y = button.y + SCREEN_HEIGHT - windows[button.window_index].min.y;
+        } 
+        else 
+        {
+            min.x = button.x + windows[button.window_index].min.x;
+            min.y = button.y + SCREEN_HEIGHT - windows[button.window_index].min.y;
+        }
+        
         Vector2D max;
         max.x = min.x + scale;
         max.y = min.y + scale;
@@ -133,20 +149,37 @@ void gooey_button_collision(Vector2D point)
         float scale = button.scale;
 
         Vector2D min;
-         Vector2D max;
+        Vector2D max;
 
-        min.x = button.x + windows[button.window_index].min.x;
-        max.y = windows[button.window_index].min.y - button.y;
+        if (button.type == RESIZE)
+        {
+            min.x = button.x + windows[button.window_index].max.x;
+            max.y = windows[button.window_index].max.y - button.y;
+        } 
+        else if (button.type == CLOSE) 
+        {
+            min.x = button.x + windows[button.window_index].max.x;
+            max.y = windows[button.window_index].min.y - button.y;
+        } 
+        else 
+        {
+            min.x = button.x + windows[button.window_index].min.x;
+            max.y = windows[button.window_index].min.y - button.y;  
+        }
 
         max.x = min.x + scale;
         min.y = max.y - scale;
 
-        printf("mousepos: %f %f\n", point.x, point.y);
-        printf("min: %f %f\n", min.x, min.y);
-        printf("max: %f %F\n", max.x, max.y);
-
         if ( point.x >= min.x && point.x <= max.x && point.y >= min.y && point.y <= max.y)
         {
+            if(button.type == HIDE)
+            {
+                windows[button.window_index].max.y = windows[button.window_index].min.y + 40;
+            }
+            else if(button.type == CLOSE)
+            {
+                window_state |= (0 << button.window_index);
+            }
             held_button_index = i;
             return;
         }
@@ -156,17 +189,38 @@ void gooey_button_collision(Vector2D point)
 
 }
 
+
+
 void gooey_button_resize(Vector2D mouse_offset)
 {
     if(held_button_index >= 0 && buttons[held_button_index].type == RESIZE)
     {   
-        windows[buttons[held_button_index].window_index].max.x += mouse_offset.x;
-        windows[buttons[held_button_index].window_index].max.y += mouse_offset.y;
+        Vector2D max = windows[buttons[held_button_index].window_index].max;
+        Vector2D min = windows[buttons[held_button_index].window_index].min;
+
+        max.x += mouse_offset.x;
+        if(max.x - min.x >= 100)
+        {
+            windows[buttons[held_button_index].window_index].max.x += mouse_offset.x;
+        }
+        
+        max.y += mouse_offset.y;      
+        if(max.y - min.y >= 40)
+        {
+            windows[buttons[held_button_index].window_index].max.y += mouse_offset.y;
+        }
+    }
+    else if(held_button_index >= 0 && buttons[held_button_index].type == HIDE)
+    {
+        
     }
 }
 
 
+void gooey_widget_destroy()
+{
 
+}
 
 
 void gooey_slider() 

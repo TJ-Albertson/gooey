@@ -34,18 +34,15 @@ int gooey_window_create(char* title, Vector2D min, Vector2D max)
             windows[i].max = max;
             strcpy(windows[i].title, title);
 
-            gooey_button_create(max.x - min.x, 5, 30, i);
+            gooey_button_create(-20, 0, 20, i, RESIZE);
+            /*gooey_button_create(0, 0, 30, i, CLOSE);*/
+            gooey_button_create(0, -20, 20, i, HIDE);
 
             return i;
         }
     }
 
     return -1;
-}
-
-void gooey_window_destroy(int index)
-{
-
 }
 
 void gooey_window_draw(GooeyColor window_color)
@@ -142,7 +139,7 @@ void gooey_window_draw(GooeyColor window_color)
         wavefront_draw(vector_shader, right_corner);
 
 
-        gooey_text(window.title, window.min.x + 5, SCREEN_HEIGHT - window.min.y + 18, 0.45, white);
+        gooey_text(window.title, window.min.x + 25, SCREEN_HEIGHT - window.min.y + 18, 0.45, white);
     }
 }
 
