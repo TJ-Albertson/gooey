@@ -4,6 +4,7 @@ out vec4 fragColor;
 in vec2 TexCoords;
 
 uniform bool convex;
+uniform vec4 color;
 
 void main()
 {
@@ -23,7 +24,7 @@ void main()
 
     if (alpha > 1.0) {
         if (convex) {
-            fragColor = vec4(1.0, 0.0, 0.0, 1.0);
+            fragColor = color;
        
         } else {
             discard;
@@ -35,7 +36,7 @@ void main()
             discard;
        
         } else {
-            fragColor = vec4(1.0, 0.0, 0.0, 1.0);
+            fragColor = color;
         }
         
        

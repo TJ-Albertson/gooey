@@ -13,7 +13,7 @@ unsigned int SCREEN_HEIGHT = 480;
 
 unsigned int window_shader, text_shader, vector_shader;
 unsigned int VAO, VBO;
-WaveFront wave_test, corner, right_corner;
+WaveFront wave_test, corner, right_corner, top_left_corner, top_right_corner, bottom_right_corner, bottom_left_corner, square;
 
 typedef enum {
     BLUE,
@@ -61,6 +61,12 @@ int gooey_initialize() {
     wave_test = load_wave("./resources/models/untitled2.obj");
     corner = load_wave("./resources/models/untitled3.obj");
     right_corner = load_wave("./resources/models/right_corner.obj");
+
+    top_left_corner = load_wave("./resources/models/top_left_corner.obj");
+    top_right_corner = load_wave("./resources/models/top_right_corner.obj");
+    bottom_right_corner = load_wave("./resources/models/bottom_right_corner.obj");
+    bottom_left_corner = load_wave("./resources/models/bottom_left_corner.obj");
+    square = load_wave("./resources/models/square.obj");
 
     return 1;
 }
