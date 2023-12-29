@@ -8,7 +8,7 @@
 
 #include <shader.h>
 #include <gooey.h>
-#include <wavefront.h>
+
 
 float mouse_x, mouse_y, mouse_x_last, mouse_y_last;
 
@@ -40,6 +40,7 @@ static void cursor_position_callback(GLFWwindow* window, double xpos, double ypo
 
     Vector2D mouse_offset = { x_offset, y_offset };
     gooey_window_move(mouse_offset);
+    gooey_button_resize(mouse_offset);
 
     mouse_x_last = mouse_x;
     mouse_y_last = mouse_y;
@@ -52,8 +53,13 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
         Vector2D mouse_pos = { mouse_x, mouse_y };
 
         gooey_window_collision(mouse_pos);
+        gooey_button_collision(mouse_pos);
     }
-        
+
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
+    {
+        held_button_index = -1;
+    }
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
@@ -187,9 +193,7 @@ int main()
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     */    
    
-    unsigned int basic_shader = createShader("resources/shaders/basic.vs", "resources/shaders/vector.fs");
-    WaveFront wave_test = load_wave("./resources/models/untitled2.obj");
-    WaveFront corner = load_wave("./resources/models/untitled3.obj");
+    
 
     Vector3D color1 = {0.5, 0.8, 0.2};
     Vector3D color2 = {0.3, 0.7, 0.9};
@@ -227,9 +231,14 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
 
         
+
+        
         Mat4* projection = ortho(0.0f, SCREEN_WIDTH, 0.0f, SCREEN_HEIGHT, 0.0f, 100.0f);
+        glUseProgram(vector_shader);
+        setShaderMat4(vector_shader, "projection", projection);
         glUseProgram(text_shader);
         setShaderMat4(text_shader, "projection", projection);
+        
         
         char mouse_pos_str[50];
 
@@ -245,6 +254,7 @@ int main()
         glUseProgram(window_shader);
         setShaderMat4(window_shader, "projection", projection);
         gooey_window_draw(BLUE);
+        gooey_button_draw();
 
         char fps_str[50];
         double currentTime = glfwGetTime();
@@ -258,24 +268,8 @@ int main()
         }
         gooey_text(fps_str, SCREEN_WIDTH - 200.0f, 40.0f, 1.0f, color1);
 
-
-        glUseProgram(basic_shader);
-        setShaderMat4(basic_shader, "projection", projection);
-        setShaderVec2(basic_shader, "iResolution", SCREEN_WIDTH, SCREEN_HEIGHT);
-
-        Mat4 model;
-        clear_matrix(&model);
-        translateMat4(&model, mouse_x, SCREEN_HEIGHT - mouse_y, 0);
-        scaleMat4(&model, svg_scale, svg_scale, 1.0f);
         
-        setShaderMat4(basic_shader, "model", &model);
-
-         setShaderBool(basic_shader, "convex", 0);
-        wavefront_draw(basic_shader, wave_test);
-
-        setShaderBool(basic_shader, "convex", 1);
-        wavefront_draw(basic_shader, corner);
-
+        
         glfwSwapBuffers(window);
         glfwPollEvents();
     }

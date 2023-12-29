@@ -3,24 +3,11 @@
 
 #include <my_math/vector.h>
 #include <gooey_state.h>
+#include <gooey_widgets.h>
 
-typedef struct {
-    Vector2D min;
-    Vector2D max;
-    char title[64];
-} Window;
 
-typedef enum {
-    BLUE,
-    RED
-} WindowColor;
 
-short window_state = 0;
-const unsigned int MAX_WINDOWS = 16;
-Window windows[16];
 
-unsigned int num_windows;
-unsigned int focused_window_index = -1;
 
 void print_binary(int data, int size) {
     int i;
@@ -31,27 +18,6 @@ void print_binary(int data, int size) {
     printf("\n");
 }
 
-Vector4D gooey_color_to_vector3(WindowColor color)
-{
-    float alpha = 0.6f;
-
-    switch (color) {
-        case BLUE: {
-            Vector4D vector_color = {0.16078f, 0.45882f, 0.73725f, alpha};
-            return vector_color;
-        }
-           
-        case RED: {
-            Vector4D vector_color = {0.0f, 0.0f, 1.0f, alpha};
-            return vector_color;
-        }
-            
-        default: {
-            Vector4D vector_color = {0.0f, 0.0f, 1.0f, alpha};
-            return vector_color;
-        }
-    }
-}
 
 int gooey_window_create(char* title, Vector2D min, Vector2D max)
 {   
@@ -68,6 +34,8 @@ int gooey_window_create(char* title, Vector2D min, Vector2D max)
             windows[i].max = max;
             strcpy(windows[i].title, title);
 
+            gooey_button_create(max.x - min.x, 5, 30, i);
+
             return i;
         }
     }
@@ -80,7 +48,7 @@ void gooey_window_destroy(int index)
 
 }
 
-void gooey_window_draw(WindowColor window_color)
+void gooey_window_draw(GooeyColor window_color)
 {
 
     int i;
@@ -157,6 +125,23 @@ void gooey_window_draw(WindowColor window_color)
 
         glBindVertexArray(0);
 
+        glUseProgram(vector_shader);
+        Mat4 model; 
+        clear_matrix(&model);
+        translateMat4(&model, window.min.x + 5, window.min.y+30, 0);
+        scaleMat4(&model, 10, 5, 1.0f);
+        
+        setShaderMat4(vector_shader, "model", &model);
+
+        setShaderBool(vector_shader, "convex", 0);
+        wavefront_draw(vector_shader, wave_test);
+
+        setShaderBool(vector_shader, "convex", 1);
+        wavefront_draw(vector_shader, corner);
+
+        wavefront_draw(vector_shader, right_corner);
+
+
         gooey_text(window.title, window.min.x + 5, SCREEN_HEIGHT - window.min.y + 18, 0.45, white);
     }
 }
@@ -187,6 +172,8 @@ void gooey_window_collision(Vector2D point)
 
     focused_window_index = -1;
 }
+
+
 
 void gooey_window_move(Vector2D mouse_offset)
 {

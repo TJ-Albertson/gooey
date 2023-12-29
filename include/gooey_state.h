@@ -6,12 +6,35 @@
 
 #include "my_math/matrix.h"
 #include "shader.h"
+#include <wavefront.h>
 
 unsigned int SCREEN_WIDTH = 640;
 unsigned int SCREEN_HEIGHT = 480;
 
-unsigned int window_shader, text_shader;
+unsigned int window_shader, text_shader, vector_shader;
 unsigned int VAO, VBO;
+WaveFront wave_test, corner, right_corner;
+
+typedef enum {
+    BLUE,
+    RED
+} GooeyColor;
+
+
+typedef struct {
+    Vector2D min;
+    Vector2D max;
+    char title[64];
+} Window;
+
+short window_state = 0;
+const unsigned int MAX_WINDOWS = 16;
+Window windows[16];
+
+unsigned int num_windows;
+unsigned int focused_window_index = -1;
+
+
 
 int gooey_initialize() {
 
@@ -34,8 +57,36 @@ int gooey_initialize() {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
+    vector_shader = createShader("resources/shaders/basic.vs", "resources/shaders/vector.fs");
+    wave_test = load_wave("./resources/models/untitled2.obj");
+    corner = load_wave("./resources/models/untitled3.obj");
+    right_corner = load_wave("./resources/models/right_corner.obj");
+
     return 1;
 }
 
+
+
+Vector4D gooey_color_to_vector3(GooeyColor color)
+{
+    float alpha = 0.6f;
+
+    switch (color) {
+        case BLUE: {
+            Vector4D vector_color = {0.16078f, 0.45882f, 0.73725f, alpha};
+            return vector_color;
+        }
+           
+        case RED: {
+            Vector4D vector_color = {0.0f, 0.0f, 1.0f, alpha};
+            return vector_color;
+        }
+            
+        default: {
+            Vector4D vector_color = {0.0f, 0.0f, 1.0f, alpha};
+            return vector_color;
+        }
+    }
+}
 
 #endif
