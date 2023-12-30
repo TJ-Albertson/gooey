@@ -195,19 +195,24 @@ void gooey_button_resize(Vector2D mouse_offset)
 {
     if(held_button_index >= 0 && buttons[held_button_index].type == RESIZE)
     {   
-        Vector2D max = windows[buttons[held_button_index].window_index].max;
-        Vector2D min = windows[buttons[held_button_index].window_index].min;
+        int index = buttons[held_button_index].window_index;
+
+        Vector2D max = windows[index].max;
+        Vector2D min = windows[index].min;
+
+        int str_length = 60 + get_string_length(windows[index].title) * 20;
 
         max.x += mouse_offset.x;
-        if(max.x - min.x >= 100)
+        if(max.x - min.x >= str_length)
         {
-            windows[buttons[held_button_index].window_index].max.x += mouse_offset.x;
+            windows[index].max.x += mouse_offset.x;
         }
+
         
         max.y += mouse_offset.y;      
-        if(max.y - min.y >= 40)
+        if(max.y - min.y >= 60)
         {
-            windows[buttons[held_button_index].window_index].max.y += mouse_offset.y;
+            windows[index].max.y += mouse_offset.y;
         }
     }
     else if(held_button_index >= 0 && buttons[held_button_index].type == HIDE)

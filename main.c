@@ -218,7 +218,8 @@ int main()
 
     Vector2D min2 = {300, 300};
     Vector2D max2 = {500, 500};
-    gooey_window_create("test2", min2, max2);
+    /* TODO: Remove max arg. change to base on text length*/
+    gooey_window_create("window t2", min2, max2);
 
     printf("window[%d].min.x: %.2f\n", window_index, windows[window_index].max.x);
 
@@ -270,7 +271,7 @@ int main()
 
 
 
-
+        /*
         glUseProgram(vector_shader);
         Mat4 model; 
         clear_matrix(&model);
@@ -382,6 +383,7 @@ int main()
         setShaderVec4(vector_shader, "color", 0.0, 0.0, 1.0, 1.0);
         setShaderMat4(vector_shader, "model", &model);
         wavefront_draw(vector_shader, top_left_corner);
+        */
         
         glfwSwapBuffers(window);
         glfwPollEvents();

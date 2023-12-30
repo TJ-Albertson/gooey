@@ -7,6 +7,15 @@
 
 
 
+int get_string_length(const char str[]) {
+    int length = 0;
+
+    while (str[length] != '\0') {
+        length++;
+    }
+
+    return length;
+}
 
 
 void print_binary(int data, int size) {
@@ -156,21 +165,23 @@ void gooey_window_draw(GooeyColor window_color)
         setShaderBool(vector_shader, "convex", 0);
         wavefront_draw(vector_shader, square);
 
-        width = 3;
+        /* Title Box */
+        int text_width = get_string_length(window.title);
         height = 2;
         x = 1;
         y = 0;
         clear_matrix(&model);
         setShaderBool(vector_shader, "convex", 0);
         translateMat4(&model, window.min.x  + (scale * x), window.min.y - (scale * y), 0);
-        scaleMat4(&model, scale * width, scale * height, 1.0f);
+        scaleMat4(&model, scale * text_width, scale * height, 1.0f);
         setShaderVec4(vector_shader, "color", 0.0, 0.0, 1.0, 1.0);
         setShaderMat4(vector_shader, "model", &model);
         wavefront_draw(vector_shader, square);
 
+        /* top inner curver*/
         width = 1;
         height = 1;
-        x = 4;
+        x = text_width + 1;
         y = 1;
         clear_matrix(&model);
         setShaderBool(vector_shader, "convex", 0);
@@ -180,9 +191,10 @@ void gooey_window_draw(GooeyColor window_color)
         setShaderMat4(vector_shader, "model", &model);
         wavefront_draw(vector_shader, top_left_corner);
 
+
         width = 1;
         height = 1;
-        x = 4;
+        x = text_width + 1;
         y = 0;
         clear_matrix(&model);
         setShaderBool(vector_shader, "convex", 0);
@@ -200,6 +212,7 @@ void gooey_window_draw(GooeyColor window_color)
         setShaderBool(vector_shader, "convex", 1);
         /* Special Case: Top Right */
         translateMat4(&model, window.max.x  - (scale * x), window.min.y - (scale * y), 0);
+
         scaleMat4(&model, scale * width, scale * height, 1.0f);
         setShaderVec4(vector_shader, "color", 0.0, 0.0, 1.0, 1.0);
         setShaderMat4(vector_shader, "model", &model);
@@ -208,18 +221,61 @@ void gooey_window_draw(GooeyColor window_color)
         width = 1;
         height = 1;
         x = 0;
-        y = 0;
+        y = -1;
         clear_matrix(&model);
         setShaderBool(vector_shader, "convex", 1);
         /* Special Case: Bottom Left */
-        translateMat4(&model, window.min.x  + (scale * x), SCREEN_HEIGHT - window.max.y + (scale * y), 0);
+        translateMat4(&model, window.min.x + (scale * x), SCREEN_HEIGHT - max.y - (scale * y), 0);
+
         scaleMat4(&model, scale * width, scale * height, 1.0f);
-        setShaderVec4(vector_shader, "color", 0.0, 0.0, 1.0, 1.0);
+        setShaderVec4(vector_shader, "color", 0.0, 1.0, 1.0, 1.0);
         setShaderMat4(vector_shader, "model", &model);
         wavefront_draw(vector_shader, bottom_left_corner);
 
+        width = 1;
+        height = 1;
+        x = 1;
+        y = -1;
+        clear_matrix(&model);
+        setShaderBool(vector_shader, "convex", 1);
+         /* Special Case: Bottom Right */
+        translateMat4(&model, window.max.x - (scale * x), SCREEN_HEIGHT - max.y - (scale * y), 0);
 
-        gooey_text(window.title, window.min.x + 25, SCREEN_HEIGHT - window.min.y + 18, 0.45, white);
+        scaleMat4(&model, scale * width, scale * height, 1.0f);
+        setShaderVec4(vector_shader, "color", 0.0, 0.0, 1.0, 1.0);
+        setShaderMat4(vector_shader, "model", &model);
+        wavefront_draw(vector_shader, bottom_right_corner);
+
+        width = 1;
+        height = 1;
+        x = 2;
+        y = -2;
+        clear_matrix(&model);
+        setShaderBool(vector_shader, "convex", 1);
+         /* Special Case: Bottom Right */
+        translateMat4(&model, window.max.x - (scale * x), SCREEN_HEIGHT - max.y - (scale * y), 0);
+
+        scaleMat4(&model, scale * width, scale * height, 1.0f);
+        setShaderVec4(vector_shader, "color", 0.0, 0.0, 1.0, 1.0);
+        setShaderMat4(vector_shader, "model", &model);
+        wavefront_draw(vector_shader, top_left_corner);
+
+        width = 1;
+        height = 1;
+        x = 1;
+        y = -2;
+        clear_matrix(&model);
+        setShaderBool(vector_shader, "convex", 0);
+         /* Special Case: Bottom Right */
+        translateMat4(&model, window.max.x - (scale * x), SCREEN_HEIGHT - max.y - (scale * y), 0);
+
+        scaleMat4(&model, scale * width, scale * height, 1.0f);
+        setShaderVec4(vector_shader, "color", 1.0, 0.0, 1.0, 1.0);
+        setShaderMat4(vector_shader, "model", &model);
+        wavefront_draw(vector_shader, square);
+
+
+        gooey_text(window.title, window.min.x + 30, SCREEN_HEIGHT - window.min.y + 25, 0.45, white);
     }
 }
 
