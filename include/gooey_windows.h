@@ -28,6 +28,8 @@ void print_binary(int data, int size) {
 }
 
 
+
+
 int gooey_window_create(char* title, Vector2D min, Vector2D max)
 {   
     /* find first empty index */
@@ -47,9 +49,9 @@ int gooey_window_create(char* title, Vector2D min, Vector2D max)
             windows[i].max = m;
             strcpy(windows[i].title, title);
 
-            gooey_button_create(-20, 0, 20, i, RESIZE);
+            gooey_button_create(-30, 10, 20, i, RESIZE);
             /*gooey_button_create(0, 0, 30, i, CLOSE);*/
-            gooey_button_create(0, -20, 20, i, HIDE);
+            gooey_button_create(5, -25, 20, i, HIDE);
 
             return i;
         }
@@ -75,13 +77,13 @@ void gooey_window_draw(GooeyColor window_color)
         /* Vector4D color = {0.2, 0.2, 0.7, 0.5}; */
         Vector4D color = gooey_color_to_vector3(window_color);
 
-        float handle_alpha = 0.6f;
+        float handle_alpha = 0.4f;
         float window_alpha = 0.6f; 
 
         if(focused_window_index == i)
         {
             handle_alpha = 0.8f;
-            window_alpha = 0.65f; 
+            window_alpha = 0.7f; 
         }
 
         glUseProgram(window_shader);
@@ -139,37 +141,52 @@ void gooey_window_draw(GooeyColor window_color)
         Mat4 model; 
         clear_matrix(&model);
         
-        /*
+       
+        /* glDisable(GL_BLEND);
             translateMat4(&model, window.min.x, window.min.y + 30, 0);
             scaleMat4(&model, 0.02 * (window.max.x - window.min.x), 5, 1.0f);
         */
 
+        glUniform4f(glGetUniformLocation(window_shader, "color"), color.x, color.y, color.z, handle_alpha);
+
         int scale = 20;
+        int width, height, x, y;
 
-        int width = 3;
-        int height = 2;
-        int x = 4;
-        int y = 1;
-        translateMat4(&model, window.min.x, window.min.y, 0);
-        scaleMat4(&model, 20, 20, 1.0f);
-        setShaderMat4(vector_shader, "model", &model); 
-        setShaderVec4(vector_shader, "color", 1.0, 0.0, 0.0, 1.0);
-        setShaderBool(vector_shader, "convex", 1);
-        wavefront_draw(vector_shader, top_left_corner);
 
+        glDisable(GL_BLEND);
+
+        /* bottom right top left corner */
         width = 1;
         height = 1;
-        x = 0;
-        y = 1;
+        x = 2;
+        y = -2;
         clear_matrix(&model);
-        translateMat4(&model, window.min.x  + (scale * x), window.min.y - (scale * y), 0);
+        setShaderBool(vector_shader, "convex", 1);
+         /* Special Case: Bottom Right */
+        translateMat4(&model, window.max.x - (scale * x), SCREEN_HEIGHT - max.y - (scale * y), 0);
+
         scaleMat4(&model, scale * width, scale * height, 1.0f);
+        /* setShaderVec4\(vector_shader, "color", 0\.0, 0\.0, 1\.0, 1\.0\); */
         setShaderMat4(vector_shader, "model", &model);
-        setShaderVec4(vector_shader, "color", 0.0, 1.0, 0.0, 1.0);
+        wavefront_draw(vector_shader, top_left_corner);
+
+        /* bottom right square */
+        width = 1;
+        height = 1;
+        x = 1;
+        y = -2;
+        clear_matrix(&model);
         setShaderBool(vector_shader, "convex", 0);
+         /* Special Case: Bottom Right */
+        translateMat4(&model, window.max.x - (scale * x), SCREEN_HEIGHT - max.y - (scale * y), 0);
+
+        scaleMat4(&model, scale * width, scale * height, 1.0f);
+        /*setShaderVec4\(vector_shader, "color", 1\.0, 0\.0, 1\.0, 1\.0\);*/
+        setShaderMat4(vector_shader, "model", &model);
         wavefront_draw(vector_shader, square);
 
-        /* Title Box */
+
+        /* Text Box */
         int text_width = get_string_length(window.title);
         height = 2;
         x = 1;
@@ -178,7 +195,6 @@ void gooey_window_draw(GooeyColor window_color)
         setShaderBool(vector_shader, "convex", 0);
         translateMat4(&model, window.min.x  + (scale * x), window.min.y - (scale * y), 0);
         scaleMat4(&model, scale * text_width, scale * height, 1.0f);
-        setShaderVec4(vector_shader, "color", 0.0, 0.0, 1.0, 1.0);
         setShaderMat4(vector_shader, "model", &model);
         wavefront_draw(vector_shader, square);
 
@@ -191,13 +207,39 @@ void gooey_window_draw(GooeyColor window_color)
         setShaderBool(vector_shader, "convex", 0);
         translateMat4(&model, window.min.x  + (scale * x), window.min.y - (scale * y), 0);
         scaleMat4(&model, scale * width, scale * height, 1.0f);
-        setShaderVec4(vector_shader, "color", 0.0, 1.0, 0.0, 1.0);
+        /* setShaderVec4\(vector_shader, "color", 0\.0, 1\.0, 0\.0, 1\.0\);*/
         setShaderMat4(vector_shader, "model", &model);
         wavefront_draw(vector_shader, top_left_corner);
 
-        
 
+        /* top left square */
+        width = 1;
+        height = 1;
+        x = 0;
+        y = 1;
+        clear_matrix(&model);
+        translateMat4(&model, window.min.x + (scale * x), window.min.y - (scale * y), 0);
+        scaleMat4(&model, scale * width, scale * height, 1.0f);
+        setShaderMat4(vector_shader, "model", &model);
+        /* setShaderVec4\(vector_shader, "color", 0\.0, 1\.0, 0\.0, 1\.0\);*/
+        setShaderBool(vector_shader, "convex", 0);
+        wavefront_draw(vector_shader, square);
 
+        glUniform4f(glGetUniformLocation(window_shader, "color"), color.x, color.y, color.z, 0.8);
+
+         /* top left corner */
+        width = 1;
+        height = 1;
+        x = 4;
+        y = 1;
+        clear_matrix(&model);
+        setShaderBool(vector_shader, "convex", 1);
+        translateMat4(&model, window.min.x, window.min.y, 0);
+        scaleMat4(&model, scale * width, scale * height, 1.0f);
+        setShaderMat4(vector_shader, "model", &model); 
+        wavefront_draw(vector_shader, top_left_corner);
+
+        /* top stretch*/
         width = 1;
         height = 1;
         x = text_width + 1;
@@ -205,11 +247,11 @@ void gooey_window_draw(GooeyColor window_color)
         clear_matrix(&model);
         setShaderBool(vector_shader, "convex", 0);
         translateMat4(&model, window.min.x  + (scale * x), window.min.y - (scale * y), 0);
-        scaleMat4(&model, scale * width + (window.max.x - window.min.x) - 140, scale * height, 1.0f);
-        setShaderVec4(vector_shader, "color", 1.0, 0.0, 0.0, 1.0);
+        scaleMat4(&model, scale * width + (window.max.x - window.min.x) - text_width * 20 - 60, scale * height, 1.0f);
         setShaderMat4(vector_shader, "model", &model);
         wavefront_draw(vector_shader, square);
 
+        /* top right */
         width = 1;
         height = 1;
         x = 1;
@@ -220,10 +262,11 @@ void gooey_window_draw(GooeyColor window_color)
         translateMat4(&model, window.max.x - (scale * x), window.min.y - (scale * y), 0);
 
         scaleMat4(&model, scale * width, scale * height, 1.0f);
-        setShaderVec4(vector_shader, "color", 0.0, 0.0, 1.0, 1.0);
+        /* setShaderVec4\(vector_shader, "color", 0\.0, 0\.0, 1\.0, 1\.0\); */
         setShaderMat4(vector_shader, "model", &model);
         wavefront_draw(vector_shader, top_right_corner);
 
+        /*bottom left */
         width = 1;
         height = 1;
         x = 0;
@@ -232,9 +275,8 @@ void gooey_window_draw(GooeyColor window_color)
         setShaderBool(vector_shader, "convex", 1);
         /* Special Case: Bottom Left */
         translateMat4(&model, window.min.x + (scale * x), SCREEN_HEIGHT - max.y - (scale * y), 0);
-
         scaleMat4(&model, scale * width, scale * height, 1.0f);
-        setShaderVec4(vector_shader, "color", 0.0, 1.0, 1.0, 1.0);
+        /*setShaderVec4\(vector_shader, "color", 0\.0, 1\.0, 1\.0, 1\.0\);;*/
         setShaderMat4(vector_shader, "model", &model);
         wavefront_draw(vector_shader, bottom_left_corner);
 
@@ -249,12 +291,12 @@ void gooey_window_draw(GooeyColor window_color)
         translateMat4(&model, window.min.x + (scale * x), SCREEN_HEIGHT - max.y - (scale * y), 0);
 
         scaleMat4(&model, scale * width + (window.max.x - window.min.x) - 60, scale * height, 1.0f);
-        setShaderVec4(vector_shader, "color", 1.0, 0.0, 1.0, 1.0);
+        /*setShaderVec4\(vector_shader, "color", 1\.0, 0\.0, 1\.0, 1\.0\);*/
         setShaderMat4(vector_shader, "model", &model);
         wavefront_draw(vector_shader, square);
 
 
-
+        /* bottom righ */
         width = 1;
         height = 1;
         x = 1;
@@ -265,38 +307,11 @@ void gooey_window_draw(GooeyColor window_color)
         translateMat4(&model, window.max.x - (scale * x), SCREEN_HEIGHT - max.y - (scale * y), 0);
 
         scaleMat4(&model, scale * width, scale * height, 1.0f);
-        setShaderVec4(vector_shader, "color", 0.0, 0.0, 1.0, 1.0);
+        /* setShaderVec4\(vector_shader, "color", 0\.0, 0\.0, 1\.0, 1\.0\); */
         setShaderMat4(vector_shader, "model", &model);
         wavefront_draw(vector_shader, bottom_right_corner);
 
-        width = 1;
-        height = 1;
-        x = 2;
-        y = -2;
-        clear_matrix(&model);
-        setShaderBool(vector_shader, "convex", 1);
-         /* Special Case: Bottom Right */
-        translateMat4(&model, window.max.x - (scale * x), SCREEN_HEIGHT - max.y - (scale * y), 0);
-
-        scaleMat4(&model, scale * width, scale * height, 1.0f);
-        setShaderVec4(vector_shader, "color", 0.0, 0.0, 1.0, 1.0);
-        setShaderMat4(vector_shader, "model", &model);
-        wavefront_draw(vector_shader, top_left_corner);
-
-        width = 1;
-        height = 1;
-        x = 1;
-        y = -2;
-        clear_matrix(&model);
-        setShaderBool(vector_shader, "convex", 0);
-         /* Special Case: Bottom Right */
-        translateMat4(&model, window.max.x - (scale * x), SCREEN_HEIGHT - max.y - (scale * y), 0);
-
-        scaleMat4(&model, scale * width, scale * height, 1.0f);
-        setShaderVec4(vector_shader, "color", 1.0, 0.0, 1.0, 1.0);
-        setShaderMat4(vector_shader, "model", &model);
-        wavefront_draw(vector_shader, square);
-
+        glEnable(GL_BLEND);
 
         gooey_text(window.title, window.min.x + 30, SCREEN_HEIGHT - window.min.y + 25, 0.45, white);
     }

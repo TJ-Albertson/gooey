@@ -228,6 +228,7 @@ int main()
 
     while (!glfwWindowShouldClose(window))
     {
+        double currentTime = glfwGetTime();
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
@@ -237,6 +238,7 @@ int main()
         Mat4* projection = ortho(0.0f, SCREEN_WIDTH, 0.0f, SCREEN_HEIGHT, 0.0f, 100.0f);
         glUseProgram(vector_shader);
         setShaderMat4(vector_shader, "projection", projection);
+      
         glUseProgram(text_shader);
         setShaderMat4(text_shader, "projection", projection);
         
@@ -254,11 +256,12 @@ int main()
 
         glUseProgram(window_shader);
         setShaderMat4(window_shader, "projection", projection);
+          setShaderFloat(window_shader, "time", currentTime);
         gooey_window_draw(BLUE);
         gooey_button_draw();
 
         char fps_str[50];
-        double currentTime = glfwGetTime();
+        
         frameCount++;
         if (currentTime - lastTime >= 1.0) 
         {

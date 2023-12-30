@@ -42,6 +42,6 @@ void main()
        
     } else {
         // Near boundary
-        fragColor = vec4(0.0, 1.0, 0.0, alpha);
+        fragColor = color;
     }
 }
