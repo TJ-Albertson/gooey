@@ -174,7 +174,7 @@ void gooey_button_collision(Vector2D point)
         {
             if(button.type == HIDE)
             {
-                windows[button.window_index].max.y = windows[button.window_index].min.y + 40;
+                windows[button.window_index].max.y = windows[button.window_index].min.y + 60;
             }
             else if(button.type == CLOSE)
             {
