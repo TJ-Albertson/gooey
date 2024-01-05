@@ -7,7 +7,7 @@ uniform bool convex;
 uniform vec4 color;
 
 void main()
-{
+{   
     vec2 p = TexCoords;
     vec2 px = dFdx(p);
     vec2 py = dFdy(p);

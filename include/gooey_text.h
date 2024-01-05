@@ -19,12 +19,15 @@ Character Characters[128];
 void gooey_text(char *text, float x, float y, float scale, Vector3D color)
 {
     /* activate corresponding render state */
-    glUseProgram(text_shader);
-    glUniform3f(glGetUniformLocation(text_shader, "textColor"), color.x, color.y, color.z);
+    glUseProgram(gooey_text_shader);
+
+    setShaderMat4(gooey_text_shader, "projection", gooey_projection_matrix);
+
+    glUniform3f(glGetUniformLocation(gooey_text_shader, "textColor"), color.x, color.y, color.z);
     glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(VAO);
 
-    y = SCREEN_HEIGHT - y;
+    y = GOOEY_SCREEN_HEIGHT - y;
 
     /* iterate through all characters */
     char *c;

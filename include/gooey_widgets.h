@@ -85,8 +85,8 @@ void gooey_button_draw()
             color.y = 0.0f;
         }
 
-        glUseProgram(window_shader);
-        glUniform4f(glGetUniformLocation(window_shader, "color"), color.x, color.y, color.z, button_alpha);
+        glUseProgram(gooey_window_shader);
+        glUniform4f(glGetUniformLocation(gooey_window_shader, "color"), color.x, color.y, color.z, button_alpha);
         glBindVertexArray(VAO);
 
         Button button = buttons[i];
@@ -97,17 +97,17 @@ void gooey_button_draw()
         if (button.type == RESIZE)
         {
             min.x = button.x + windows[button.window_index].max.x;
-            min.y = button.y + SCREEN_HEIGHT - windows[button.window_index].max.y;
+            min.y = button.y + GOOEY_SCREEN_HEIGHT - windows[button.window_index].max.y;
         } 
         else if (button.type == CLOSE) 
         {
             min.x = button.x + windows[button.window_index].max.x;
-            min.y = button.y + SCREEN_HEIGHT - windows[button.window_index].min.y;
+            min.y = button.y + GOOEY_SCREEN_HEIGHT - windows[button.window_index].min.y;
         } 
         else 
         {
             min.x = button.x + windows[button.window_index].min.x;
-            min.y = button.y + SCREEN_HEIGHT - windows[button.window_index].min.y;
+            min.y = button.y + GOOEY_SCREEN_HEIGHT - windows[button.window_index].min.y;
         }
         
         Vector2D max;

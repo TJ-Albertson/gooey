@@ -10,6 +10,9 @@
 #include <gooey.h>
 
 
+unsigned int SCREEN_WIDTH = 640;
+unsigned int SCREEN_HEIGHT = 480;
+
 float mouse_x, mouse_y, mouse_x_last, mouse_y_last;
 
 float svg_scale = 200.0f;
@@ -21,6 +24,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     SCREEN_WIDTH = width;
     SCREEN_HEIGHT = height;
     glViewport(0, 0, width, height);
+    gooey_screen_resize(width, height);
 }
 
 static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
@@ -65,6 +69,21 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
     svg_scale += yoffset * 20;
+}
+
+void gooey_render()
+{
+    double currentTime = glfwGetTime();
+
+    glUseProgram(gooey_vector_shader);
+    setShaderMat4(gooey_vector_shader, "projection", gooey_projection_matrix);
+
+    glUseProgram(gooey_window_shader);
+    setShaderMat4(gooey_window_shader, "projection", gooey_projection_matrix);
+
+    setShaderFloat(gooey_window_shader, "time", currentTime);
+    gooey_window_draw(BLUE);
+    gooey_button_draw();
 }
 
 int main()
@@ -180,7 +199,7 @@ int main()
     FT_Done_Face(face);
     FT_Done_FreeType(ft);
 
-    if (!gooey_initialize())
+    if (!gooey_initialize(SCREEN_WIDTH, SCREEN_HEIGHT))
     {
         fprintf(stderr, "ERROR::GOOEY: Failed to initialize GOOEY\n");
         return -1;
@@ -229,37 +248,17 @@ int main()
     while (!glfwWindowShouldClose(window))
     {
         double currentTime = glfwGetTime();
+        
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
         
-
-        
-        Mat4* projection = ortho(0.0f, SCREEN_WIDTH, 0.0f, SCREEN_HEIGHT, 0.0f, 100.0f);
-        glUseProgram(vector_shader);
-        setShaderMat4(vector_shader, "projection", projection);
-      
-        glUseProgram(text_shader);
-        setShaderMat4(text_shader, "projection", projection);
-        
-        
         char mouse_pos_str[50];
-
         sprintf(mouse_pos_str, "X=%.2f, Y=%.2f", mouse_x, mouse_y);
-
-
-        
         gooey_text(mouse_pos_str, 50.0f, 50.0f, 1.0f, color1);
-
-
         gooey_text("(C) LearnOpenGL.com", 420.0f, 400.0f, 0.5f, color2);
-
-        glUseProgram(window_shader);
-        setShaderMat4(window_shader, "projection", projection);
-          setShaderFloat(window_shader, "time", currentTime);
-        gooey_window_draw(BLUE);
-        gooey_button_draw();
-
+        
+        
         char fps_str[50];
         
         frameCount++;
@@ -272,122 +271,10 @@ int main()
         }
         gooey_text(fps_str, SCREEN_WIDTH - 300.0f, 50.0f, 1.0f, color1);
 
-
-
-        /*
-        glUseProgram(vector_shader);
-        Mat4 model; 
-        clear_matrix(&model);
-        translateMat4(&model, mouse_x, SCREEN_HEIGHT - mouse_y, 0);
-        scaleMat4(&model, svg_scale, svg_scale, 1.0f);
-        setShaderMat4(vector_shader, "model", &model);
-        setShaderBool(vector_shader, "convex", 1);
-        setShaderVec4(vector_shader, "color", 1.0, 0.0, 0.0, 1.0);
-        wavefront_draw(vector_shader, top_left_corner);
-
-
-        clear_matrix(&model);
-        setShaderBool(vector_shader, "convex", 0);
-        translateMat4(&model, mouse_x, SCREEN_HEIGHT - mouse_y - svg_scale, 0);
-        scaleMat4(&model, svg_scale, svg_scale, 1.0f);
-        setShaderVec4(vector_shader, "color", 0.0, 1.0, 0.0, 1.0);
-        setShaderMat4(vector_shader, "model", &model);
-        wavefront_draw(vector_shader, square);
-
-        int width = 3;
-        int height = 2;
-        clear_matrix(&model);
-        setShaderBool(vector_shader, "convex", 0);
-        translateMat4(&model, mouse_x + svg_scale, SCREEN_HEIGHT - mouse_y, 0);
-        scaleMat4(&model, svg_scale * width, svg_scale * height, 1.0f);
-        setShaderVec4(vector_shader, "color", 0.0, 0.0, 1.0, 1.0);
-        setShaderMat4(vector_shader, "model", &model);
-        wavefront_draw(vector_shader, square);
-
-        int x = 4;
-        int y = 1;
-        clear_matrix(&model);
-        setShaderBool(vector_shader, "convex", 0);
-        translateMat4(&model, mouse_x + svg_scale * 4, SCREEN_HEIGHT - mouse_y - svg_scale, 0);
-        scaleMat4(&model, svg_scale, svg_scale, 1.0f);
-        setShaderVec4(vector_shader, "color", 0.0, 1.0, 0.0, 1.0);
-        setShaderMat4(vector_shader, "model", &model);
-        wavefront_draw(vector_shader, top_left_corner);
-
-        clear_matrix(&model);
-        setShaderBool(vector_shader, "convex", 0);
-        translateMat4(&model, mouse_x + svg_scale * 4, SCREEN_HEIGHT - mouse_y, 0);
-        scaleMat4(&model, svg_scale * 5, svg_scale, 1.0f);
-        setShaderVec4(vector_shader, "color", 1.0, 0.0, 0.0, 1.0);
-        setShaderMat4(vector_shader, "model", &model);
-        wavefront_draw(vector_shader, square);
-
-        clear_matrix(&model);
-        setShaderBool(vector_shader, "convex", 1);
-        translateMat4(&model, mouse_x + svg_scale * 9, SCREEN_HEIGHT - mouse_y, 0);
-        scaleMat4(&model, svg_scale, svg_scale, 1.0f);
-        setShaderVec4(vector_shader, "color", 0.0, 0.0, 1.0, 1.0);
-        setShaderMat4(vector_shader, "model", &model);
-        wavefront_draw(vector_shader, top_right_corner);
-
-
-        clear_matrix(&model);
-        setShaderBool(vector_shader, "convex", 1);
-        translateMat4(&model, mouse_x, SCREEN_HEIGHT - mouse_y - svg_scale * 5, 0);
-        scaleMat4(&model, svg_scale, svg_scale, 1.0f);
-        setShaderVec4(vector_shader, "color", 0.0, 0.0, 1.0, 1.0);
-        setShaderMat4(vector_shader, "model", &model);
-        wavefront_draw(vector_shader, bottom_left_corner);
-
-        width = 8;
-        height = 1;
-        x = 1;
-        y = 5;
-        clear_matrix(&model);
-        setShaderBool(vector_shader, "convex", 0);
-        translateMat4(&model, mouse_x + (svg_scale * x), SCREEN_HEIGHT - mouse_y - (svg_scale * y), 0);
-        scaleMat4(&model, svg_scale * width, svg_scale * height, 1.0f);
-        setShaderVec4(vector_shader, "color", 1.0, 0.0, 0.0, 1.0);
-        setShaderMat4(vector_shader, "model", &model);
-        wavefront_draw(vector_shader, square);
-
-        width = 1;
-        height = 1;
-        x = 9;
-        y = 5;
-        clear_matrix(&model);
-        setShaderBool(vector_shader, "convex", 1);
-        translateMat4(&model, mouse_x + (svg_scale * x), SCREEN_HEIGHT - mouse_y - (svg_scale * y), 0);
-        scaleMat4(&model, svg_scale * width, svg_scale * height, 1.0f);
-        setShaderVec4(vector_shader, "color", 0.0, 0.0, 1.0, 1.0);
-        setShaderMat4(vector_shader, "model", &model);
-        wavefront_draw(vector_shader, bottom_right_corner);
-
-        width = 1;
-        height = 1;
-        x = 9;
-        y = 4;
-        clear_matrix(&model);
-        setShaderBool(vector_shader, "convex", 0);
-        translateMat4(&model, mouse_x + (svg_scale * x), SCREEN_HEIGHT - mouse_y - (svg_scale * y), 0);
-        scaleMat4(&model, svg_scale * width, svg_scale * height, 1.0f);
-        setShaderVec4(vector_shader, "color", 0.0, 1.0, 0.0, 1.0);
-        setShaderMat4(vector_shader, "model", &model);
-        wavefront_draw(vector_shader, square);
-
-        width = 1;
-        height = 1;
-        x = 8;
-        y = 4;
-        clear_matrix(&model);
-        setShaderBool(vector_shader, "convex", 1);
-        translateMat4(&model, mouse_x + (svg_scale * x), SCREEN_HEIGHT - mouse_y - (svg_scale * y), 0);
-        scaleMat4(&model, svg_scale * width, svg_scale * height, 1.0f);
-        setShaderVec4(vector_shader, "color", 0.0, 0.0, 1.0, 1.0);
-        setShaderMat4(vector_shader, "model", &model);
-        wavefront_draw(vector_shader, top_left_corner);
-        */
         
+
+        gooey_render();
+
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
@@ -395,3 +282,5 @@ int main()
     glfwTerminate();
     return 0;
 }
+
+
